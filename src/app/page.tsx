@@ -380,7 +380,7 @@ export default function HomePage() {
                 key={clip.id}
                 clip={clip}
                 isActive={idx === activeIndex}
-                isNearActive={Math.abs(idx - activeIndex) <= 1}
+                isNearActive={activeTab === 'local' ? true : Math.abs(idx - activeIndex) <= 2}
                 isLocalMode={activeTab === 'local'}
                 onLikeToggle={handleLikeToggle}
                 onSaveToggle={handleSaveToggle}

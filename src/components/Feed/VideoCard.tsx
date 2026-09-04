@@ -49,8 +49,7 @@ export const VideoCard: React.FC<VideoCardProps> = ({
           setIsPlaying(true);
           setIsBuffering(false);
         })
-        .catch((err) => {
-          // If browser blocked unmuted autoplay, try playing or wait for user tap
+        .catch(() => {
           setIsPlaying(false);
           setIsBuffering(false);
         });
@@ -69,17 +68,17 @@ export const VideoCard: React.FC<VideoCardProps> = ({
     const video = videoRef.current;
     if (!video) return;
 
-    if (isActive && isNearActive) {
-      // If video is ready, play immediately; otherwise onCanPlay will trigger it
+    if (isActive) {
       if (video.readyState >= 2) {
         safePlay();
       } else {
         video.load();
+        safePlay();
       }
     } else {
       safePause();
     }
-  }, [isActive, isNearActive, safePlay, safePause]);
+  }, [isActive, safePlay, safePause]);
 
   // When video data is ready to play
   const handleCanPlay = () => {
@@ -127,6 +126,8 @@ export const VideoCard: React.FC<VideoCardProps> = ({
     }
   };
 
+  const shouldRenderVideoTag = isLocalMode || isNearActive;
+
   return (
     <div 
       className="video-slide" 
@@ -134,8 +135,8 @@ export const VideoCard: React.FC<VideoCardProps> = ({
       onClick={togglePlayPause}
       onDoubleClick={handleDoubleClick}
     >
-      {/* Video Element */}
-      {isNearActive ? (
+      {/* Video Element (Kept mounted to prevent blank screen on scroll) */}
+      {shouldRenderVideoTag ? (
         <video
           ref={videoRef}
           key={clip.id}
@@ -145,22 +146,27 @@ export const VideoCard: React.FC<VideoCardProps> = ({
           loop={!onVideoEnded}
           onEnded={onVideoEnded}
           playsInline
-          preload={isLocalMode ? 'metadata' : 'auto'}
+          preload={isActive ? 'auto' : 'metadata'}
           onCanPlay={handleCanPlay}
           onLoadedData={handleCanPlay}
-          onWaiting={() => setIsBuffering(true)}
+          onWaiting={() => isActive && setIsBuffering(true)}
           onPlaying={() => {
             setIsBuffering(false);
             setIsPlaying(true);
           }}
           onPause={() => setIsPlaying(false)}
           onTimeUpdate={handleTimeUpdate}
+          style={{
+            objectFit: 'cover',
+            width: '100%',
+            height: '100%',
+          }}
         />
       ) : (
         <div 
           className="video-element"
           style={{ 
-            backgroundImage: clip.posterUrl ? `url(${clip.posterUrl})` : 'none',
+            backgroundImage: clip.posterUrl ? `url(${clip.posterUrl})` : 'linear-gradient(135deg, #12131e 0%, #000 100%)',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             backgroundColor: 'black'
@@ -171,6 +177,36 @@ export const VideoCard: React.FC<VideoCardProps> = ({
       {/* Overlays */}
       <div className="video-gradient-top" />
       <div className="video-gradient-bottom" />
+
+      {/* Play Overlay Button if video is paused while active */}
+      {!isPlaying && isActive && !isBuffering && (
+        <div 
+          style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            zIndex: 14,
+            width: '72px',
+            height: '72px',
+            borderRadius: '50%',
+            background: 'rgba(0, 0, 0, 0.45)',
+            backdropFilter: 'blur(8px)',
+            border: '2px solid rgba(37, 244, 238, 0.6)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#fff',
+            cursor: 'pointer',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5)',
+          }}
+          onClick={togglePlayPause}
+        >
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="currentColor" style={{ marginLeft: '4px' }}>
+            <polygon points="5 3 19 12 5 21 5 3" />
+          </svg>
+        </div>
+      )}
 
       {/* Buffering Spinner */}
       {isBuffering && isActive && (
@@ -208,7 +244,7 @@ export const VideoCard: React.FC<VideoCardProps> = ({
               backdropFilter: 'blur(4px)',
             }}
           >
-            Memuat Video (Ketuk layar jika tidak jalan)
+            Memuat Video...
           </span>
         </div>
       )}
