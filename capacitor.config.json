@@ -1,0 +1,8 @@
+{
+  "appId": "com.animetok.app",
+  "appName": "AnimeTok",
+  "webDir": "out",
+  "server": {
+    "androidScheme": "https"
+  }
+}
