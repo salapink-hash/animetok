@@ -146,18 +146,10 @@ export const VideoCard: React.FC<VideoCardProps> = ({
           loop={!onVideoEnded}
           onEnded={onVideoEnded}
           playsInline
-          preload={isActive ? 'auto' : 'metadata'}
+          preload={isActive ? 'metadata' : 'none'}
           onCanPlay={handleCanPlay}
           onLoadedData={handleCanPlay}
-          onWaiting={() => {
-            if (isActive) {
-              setIsBuffering(true);
-              // Fallback to clear buffering state if stuck
-              setTimeout(() => {
-                setIsBuffering(false);
-              }, 2500);
-            }
-          }}
+          onWaiting={() => isActive && setIsBuffering(true)}
           onPlaying={() => {
             setIsBuffering(false);
             setIsPlaying(true);
