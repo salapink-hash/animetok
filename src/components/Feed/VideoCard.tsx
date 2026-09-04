@@ -145,9 +145,9 @@ export const VideoCard: React.FC<VideoCardProps> = ({
           loop={!onVideoEnded}
           onEnded={onVideoEnded}
           playsInline
-          preload="auto"
-          muted={false}
+          preload={isLocalMode ? 'metadata' : 'auto'}
           onCanPlay={handleCanPlay}
+          onLoadedData={handleCanPlay}
           onWaiting={() => setIsBuffering(true)}
           onPlaying={() => {
             setIsBuffering(false);
@@ -181,19 +181,35 @@ export const VideoCard: React.FC<VideoCardProps> = ({
             left: '50%',
             transform: 'translate(-50%, -50%)',
             zIndex: 15,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '10px',
             pointerEvents: 'none',
           }}
         >
           <div 
             style={{
-              width: '40px',
-              height: '40px',
+              width: '44px',
+              height: '44px',
               border: '3px solid rgba(255,255,255,0.2)',
               borderTopColor: 'var(--secondary-cyan)',
               borderRadius: '50%',
               animation: 'spinVinyl 0.8s linear infinite',
             }} 
           />
+          <span
+            style={{
+              fontSize: '11px',
+              color: '#fff',
+              background: 'rgba(0,0,0,0.6)',
+              padding: '4px 10px',
+              borderRadius: '12px',
+              backdropFilter: 'blur(4px)',
+            }}
+          >
+            Memuat Video (Ketuk layar jika tidak jalan)
+          </span>
         </div>
       )}
 
